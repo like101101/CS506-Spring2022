@@ -1,6 +1,4 @@
-
 import pandas as pd
-import csv
 # read csv file as a list of lists
 
 def read_csv(csv_file_path):
@@ -9,5 +7,5 @@ def read_csv(csv_file_path):
         in row major.
     """
     df = pd.read_csv(csv_file_path)
-    return df.values.tolist()
-
+    result = df.to_numpy()
+    return result
