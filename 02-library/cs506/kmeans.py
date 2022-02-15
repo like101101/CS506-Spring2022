@@ -1,7 +1,12 @@
 from collections import defaultdict
+from dis import dis
 from math import inf
 import random
 import csv
+from tkinter import N
+from unittest import result
+import numpy as np
+from .sim import euclidean_dist
 
 
 def point_avg(points):
@@ -11,7 +16,7 @@ def point_avg(points):
     
     Returns a new point which is the center of all the points.
     """
-    raise NotImplementedError()
+    return np.mean(points)
 
 
 def update_centers(dataset, assignments):
@@ -21,7 +26,18 @@ def update_centers(dataset, assignments):
     Compute the center for each of the assigned groups.
     Return `k` centers in a list
     """
-    raise NotImplementedError()
+    result = []
+    groups = np.unique(assignments)
+
+    for i in groups:
+        data = []
+        for j in range(len(dataset)):
+            if(assignments[j] == i):
+                data.append(dataset[j])
+        ct = point_avg(data)
+        result.append(ct)
+
+    return result
 
 def assign_points(data_points, centers):
     """
@@ -43,20 +59,25 @@ def distance(a, b):
     """
     Returns the Euclidean distance between a and b
     """
-    raise NotImplementedError()
+    return euclidean_dist(a,b)
 
 def distance_squared(a, b):
-    raise NotImplementedError()
+    return distance(a,b)**2
 
 def generate_k(dataset, k):
     """
     Given `data_set`, which is an array of arrays,
     return a random set of k points from the data_set
     """
-    raise NotImplementedError()
+    return np.random.choice(dataset,k)
 
 def cost_function(clustering):
-    raise NotImplementedError()
+    result = 0
+    for i in range(len(clustering)):
+        current_cluster = clustering[i]
+        result += point_avg(current_cluster)
+
+    return result
 
 
 def generate_k_pp(dataset, k):
@@ -66,7 +87,33 @@ def generate_k_pp(dataset, k):
     where points are picked with a probability proportional
     to their distance as per kmeans pp
     """
-    raise NotImplementedError()
+    
+
+    unpicked = list(range(len(dataset)))
+    picked = []
+    first_pick = np.random.randint(0, len(dataset))
+    picked.append(first_pick)
+    unpicked.remove(first_pick)
+
+    for z in range(k-1):
+        dist_dic = {}
+        p_dic={}
+        total = 0
+        for i in unpicked:
+            dist = 0
+            for j in picked:
+                dist += distance_squared(dataset[i], dataset[j])
+            dist_dic[i] = dist
+            total += dist
+        
+        for idx in dist_dic:
+            p_dic[idx] = dist_dic[idx]/total
+    
+        next_center = np.random.choice(unpicked,p_dic)
+        picked.append(next_center)
+        unpicked.remove(next_center)
+     
+    return picked
 
 
 def _do_lloyds_algo(dataset, k_points):
